@@ -1,6 +1,7 @@
 import { Construct } from "constructs";
 import { App, Chart, ChartProps } from "cdk8s";
 import { WebService } from "./lib/web-service";
+import { ExternalDNS } from "./lib/external-dns";
 
 export class MyChart extends Chart {
   constructor(scope: Construct, id: string, props: ChartProps = {}) {
@@ -14,5 +15,8 @@ export class MyChart extends Chart {
 }
 
 const app = new App();
+
 new MyChart(app, "hello");
+new ExternalDNS(app, "external-dns");
+
 app.synth();
