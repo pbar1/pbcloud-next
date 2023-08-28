@@ -40,8 +40,10 @@ export class ContainerBuilder {
     return this;
   }
 
-  asWorkload(scope: Construct, id: string): WorkloadBuilder {
-    return new WorkloadBuilder(scope, id).withContainer(this.container);
+  asWorkload(): WorkloadBuilder {
+    return new WorkloadBuilder()
+      .withContainer(this.container)
+      .withName(this.container.name);
   }
 
   build(): k8s.Container {
@@ -67,13 +69,9 @@ export interface WorkloadProps {
 }
 
 export class WorkloadBuilder {
-  private scope: Construct;
-  private id: string;
   private props: WorkloadProps;
 
-  constructor(scope: Construct, id: string) {
-    this.scope = scope;
-    this.id = id;
+  constructor() {
     this.props = {};
   }
 
@@ -105,7 +103,11 @@ export class WorkloadBuilder {
     return this;
   }
 
-  // TODO: Suss this UX out
+  /**
+   * Adds a volume and volume mount pair to the workload.
+   * @param pair Tuple containing the volume and volume mount.
+   * @param containerName Applies the volume mount to only this container.
+   */
   withVolumeAndMount(
     pair: [k8s.Volume, k8s.VolumeMount],
     containerName?: string
@@ -127,14 +129,13 @@ export class WorkloadBuilder {
           container.volumeMounts = [];
         }
         container.volumeMounts.push(mount);
-        // container.volumeMounts[0] = mount;
       });
 
     return this;
   }
 
-  build(): Workload {
-    return new Workload(this.scope, this.id, this.props);
+  build(scope: Construct, id: string): Workload {
+    return new Workload(scope, id, this.props);
   }
 }
 
