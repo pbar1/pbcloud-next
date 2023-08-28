@@ -2,7 +2,7 @@ import { Construct } from "constructs";
 import * as k8s from "../imports/k8s";
 import * as helpers from "./helpers";
 import { Chart } from "cdk8s";
-import { Writable } from "type-fest";
+import { WritableDeep } from "type-fest";
 
 // ----------------------------------------------------------------------------
 
@@ -17,7 +17,7 @@ export function container(image: string, name?: string): ContainerBuilder {
 }
 
 export class ContainerBuilder {
-  private container: Writable<k8s.Container>;
+  private container: WritableDeep<k8s.Container>;
 
   constructor(image: string, name?: string) {
     name = name ?? helpers.nameFromImage(image);
@@ -62,8 +62,8 @@ export interface WorkloadProps {
   namespace?: string;
   workloadType?: WorkloadType;
   expose?: boolean;
-  containers?: Writable<k8s.Container>[];
-  volumes?: k8s.Volume[];
+  containers?: WritableDeep<k8s.Container>[];
+  volumes?: WritableDeep<k8s.Volume>[];
 }
 
 export class WorkloadBuilder {
@@ -121,12 +121,13 @@ export class WorkloadBuilder {
       this.props.containers = [];
     }
     this.props.containers
-      .filter((container) => container.name === containerName)
+      .filter((container) => !containerName ?? container.name === containerName)
       .forEach((container) => {
         if (!container.volumeMounts) {
           container.volumeMounts = [];
         }
         container.volumeMounts.push(mount);
+        // container.volumeMounts[0] = mount;
       });
 
     return this;
