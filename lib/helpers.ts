@@ -52,3 +52,24 @@ export function port(
     name,
   };
 }
+
+/**
+ * Convenience function for creating a Kubernetes volume and volume mount of
+ * type `hostPath`.
+ * @param name Volume name.
+ * @param hostPath Path on the host.
+ * @param mountPath Path within the container.
+ * @param readOnly Whether to mount the path as read-only.
+ * @returns A tuple containing the volume and volume mount.
+ */
+export function hostPath(
+  name: string,
+  hostPath: string,
+  mountPath: string,
+  readOnly?: boolean
+): [k8s.Volume, k8s.VolumeMount] {
+  return [
+    { name, hostPath: { path: hostPath } },
+    { name, mountPath, readOnly },
+  ];
+}

@@ -62,7 +62,8 @@ export interface WorkloadProps {
   namespace?: string;
   workloadType?: WorkloadType;
   expose?: boolean;
-  containers?: k8s.Container[];
+  containers?: Writable<k8s.Container>[];
+  volumes?: k8s.Volume[];
 }
 
 export class WorkloadBuilder {
@@ -104,6 +105,33 @@ export class WorkloadBuilder {
     return this;
   }
 
+  // TODO: Suss this UX out
+  withVolumeAndMount(
+    pair: [k8s.Volume, k8s.VolumeMount],
+    containerName?: string
+  ) {
+    let [volume, mount] = pair;
+
+    if (!this.props.volumes) {
+      this.props.volumes = [];
+    }
+    this.props.volumes.push(volume);
+
+    if (!this.props.containers) {
+      this.props.containers = [];
+    }
+    this.props.containers
+      .filter((container) => container.name === containerName)
+      .forEach((container) => {
+        if (!container.volumeMounts) {
+          container.volumeMounts = [];
+        }
+        container.volumeMounts.push(mount);
+      });
+
+    return this;
+  }
+
   build(): Workload {
     return new Workload(this.scope, this.id, this.props);
   }
@@ -122,6 +150,7 @@ export class Workload extends Chart {
     const workloadType = props.workloadType ?? WorkloadType.Deployment;
     const expose = props.expose ?? false;
     const containers = props.containers;
+    const volumes = props.volumes;
     const selectorLabels = { app: name };
 
     if (workloadType === WorkloadType.Deployment) {
@@ -130,8 +159,7 @@ export class Workload extends Chart {
         spec: {
           selector: { matchLabels: selectorLabels },
           template: {
-            // TODO: fill in
-            spec: { containers },
+            spec: { containers, volumes },
           },
         },
       });
