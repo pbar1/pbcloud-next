@@ -1,40 +1,55 @@
 import { Construct } from "constructs";
 import * as k8s from "../imports/k8s";
-import * as path from "path";
+import * as helpers from "./helpers";
 import { Chart } from "cdk8s";
+import { Writable } from "type-fest";
 
-export function container(image: string, name?: string): k8s.Container {
-  // Given an image like "ghcr.io/example/img:latest", return "img"
-  if (name === undefined) {
-    name = path.basename(image);
-    name = name.split(":")[0];
+// ----------------------------------------------------------------------------
+
+/**
+ * Creates a new container builder.
+ * @param image Container image.
+ * @param name Container name. If not set, defaults to the basename of the image.
+ * @returns
+ */
+export function container(image: string, name?: string): ContainerBuilder {
+  return new ContainerBuilder(image, name);
+}
+
+export class ContainerBuilder {
+  private container: Writable<k8s.Container>;
+
+  constructor(image: string, name?: string) {
+    name = name ?? helpers.nameFromImage(image);
+    this.container = { name, image };
   }
 
-  return { name, image };
+  withEnv(env: k8s.EnvVar) {
+    if (!this.container.env) {
+      this.container.env = [];
+    }
+    this.container.env.push(env);
+    return this;
+  }
+
+  withPort(port: k8s.ContainerPort) {
+    if (!this.container.ports) {
+      this.container.ports = [];
+    }
+    this.container.ports.push(port);
+    return this;
+  }
+
+  asWorkload(scope: Construct, id: string): WorkloadBuilder {
+    return new WorkloadBuilder(scope, id).withContainer(this.container);
+  }
+
+  build(): k8s.Container {
+    return this.container;
+  }
 }
 
-export function env(name: string, value: string): k8s.EnvVar {
-  return { name, value };
-}
-
-export function envSec(name: string, secret: string, key: string): k8s.EnvVar {
-  return {
-    name,
-    valueFrom: { secretKeyRef: { name: secret, key } },
-  };
-}
-
-export function port(
-  port: number,
-  protocol?: string,
-  name?: string
-): k8s.ContainerPort {
-  return {
-    containerPort: port,
-    protocol,
-    name,
-  };
-}
+// ----------------------------------------------------------------------------
 
 export enum WorkloadType {
   Deployment,

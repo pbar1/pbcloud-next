@@ -1,4 +1,13 @@
 import * as k8s from "../imports/k8s";
+import * as path from "path";
+
+/**
+ * Given an image like "ghcr.io/example/img:latest", return "img".
+ * @param image Container image.
+ */
+export function nameFromImage(image: string): string {
+  return path.basename(image).split(":")[0];
+}
 
 /**
  * Convenience function for creating a Kubernetes container environment
