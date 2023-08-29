@@ -4,6 +4,14 @@ import * as helpers from "./helpers";
 import { Chart } from "cdk8s";
 import { WritableDeep } from "type-fest";
 
+// TODO: Consider merging the ContainerBuilder and WorkloadBuilder back
+// together now that ExposeType is now in the mix. It could work well if the
+// type-state pattern is used to add some guards. The flow looks relatively
+// fluent alredy: container->workload->expose. Actually in thinking about this
+// now, they should all probably have their own builders and be chained
+// fluently using `.as()` methods instead, to allow for merging in and creation
+// of new expose types from scratch for example.
+
 // Container ------------------------------------------------------------------
 
 /**
@@ -64,11 +72,17 @@ export enum WorkloadType {
   CronJob,
 }
 
+export enum ExposeType {
+  Service,
+  Ingress,
+  HttpProxy,
+}
+
 export interface WorkloadProps {
   name?: string;
   namespace?: string;
   workloadType?: WorkloadType;
-  expose?: boolean;
+  exposeType?: ExposeType;
   containers?: WritableDeep<k8s.Container>[];
   volumes?: WritableDeep<k8s.Volume>[];
   schedule?: string;
@@ -97,7 +111,7 @@ export class WorkloadBuilder {
   }
 
   withExpose() {
-    this.props.expose = true;
+    this.props.exposeType = ExposeType.Service;
     return this;
   }
 
@@ -161,7 +175,7 @@ export class Workload extends Chart {
     const name = props.name ?? id;
     const namespace = props.namespace;
     const workloadType = props.workloadType ?? WorkloadType.Deployment;
-    const expose = props.expose ?? false;
+    const exposeType = props.exposeType;
     const containers = props.containers;
     const volumes = props.volumes;
     const schedule = props.schedule;
@@ -172,7 +186,9 @@ export class Workload extends Chart {
 
     if (workloadType === WorkloadType.Pod) {
       new k8s.Pod(this, "pod", { metadata, spec: podSpec });
-    } else if (workloadType === WorkloadType.ReplicaSet) {
+    }
+
+    if (workloadType === WorkloadType.ReplicaSet) {
       new k8s.ReplicaSet(this, "replicaset", {
         metadata,
         spec: {
@@ -180,7 +196,9 @@ export class Workload extends Chart {
           template: { spec: podSpec },
         },
       });
-    } else if (workloadType === WorkloadType.Deployment) {
+    }
+
+    if (workloadType === WorkloadType.Deployment) {
       new k8s.Deployment(this, "deployment", {
         metadata,
         spec: {
@@ -188,7 +206,9 @@ export class Workload extends Chart {
           template: { spec: podSpec },
         },
       });
-    } else if (workloadType === WorkloadType.StatefulSet) {
+    }
+
+    if (workloadType === WorkloadType.StatefulSet) {
       new k8s.StatefulSet(this, "statefulset", {
         metadata,
         spec: {
@@ -197,7 +217,9 @@ export class Workload extends Chart {
           serviceName: name,
         },
       });
-    } else if (workloadType === WorkloadType.DaemonSet) {
+    }
+
+    if (workloadType === WorkloadType.DaemonSet) {
       new k8s.DaemonSet(this, "daemonset", {
         metadata,
         spec: {
@@ -205,12 +227,16 @@ export class Workload extends Chart {
           template: { spec: podSpec },
         },
       });
-    } else if (workloadType === WorkloadType.Job) {
+    }
+
+    if (workloadType === WorkloadType.Job) {
       new k8s.Job(this, "job", {
         metadata,
         spec: { template: { spec: podSpec } },
       });
-    } else if (workloadType === WorkloadType.CronJob) {
+    }
+
+    if (workloadType === WorkloadType.CronJob) {
       if (!schedule) {
         throw new Error("must set schedule for for CronJob");
       }
@@ -223,8 +249,9 @@ export class Workload extends Chart {
       });
     }
 
+    // All expose types will at least need a Service
     // StatefulSets require an associated Service
-    if (expose || workloadType === WorkloadType.StatefulSet) {
+    if (exposeType !== undefined || workloadType === WorkloadType.StatefulSet) {
       let servicePorts: k8s.ServicePort[] = [];
       containers.forEach((ctr) => {
         ctr.ports?.forEach((port) =>
@@ -243,6 +270,14 @@ export class Workload extends Chart {
           ports: servicePorts,
         },
       });
+    }
+
+    if (exposeType === ExposeType.Ingress) {
+      throw new Error("ingress not implemented");
+    }
+
+    if (exposeType === ExposeType.HttpProxy) {
+      throw new Error("httpproxy not implemented");
     }
   }
 }
