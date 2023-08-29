@@ -1,4 +1,7 @@
+output: dist
+pluginsDirectory: ~/.cdk8s/plugins
 language: typescript
 app: yarn ts-node main.ts
 imports:
-- k8s
+  - k8s
+  - github:projectcontour/contour@1.25.0
