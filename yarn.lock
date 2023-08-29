@@ -1768,7 +1768,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cdk8s-plus-25@npm:^2.16.0, cdk8s-plus-25@npm:^2.21.0":
+"cdk8s-plus-25@npm:^2.21.0":
   version: 2.21.0
   resolution: "cdk8s-plus-25@npm:2.21.0"
   dependencies:
@@ -5364,7 +5364,6 @@ __metadata:
     "@types/node": ^14
     cdk8s: ^2.29.0
     cdk8s-cli: ^2.15.1
-    cdk8s-plus-25: ^2.16.0
     constructs: ^10.2.69
     jest: ^26
     ts-jest: ^26
