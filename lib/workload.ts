@@ -4,7 +4,7 @@ import * as helpers from "./helpers";
 import { Chart } from "cdk8s";
 import { WritableDeep } from "type-fest";
 
-// ----------------------------------------------------------------------------
+// Container ------------------------------------------------------------------
 
 /**
  * Creates a new container builder.
@@ -40,8 +40,9 @@ export class ContainerBuilder {
     return this;
   }
 
-  asWorkload(): WorkloadBuilder {
+  asWorkload(workloadType = WorkloadType.Deployment): WorkloadBuilder {
     return new WorkloadBuilder()
+      .withWorkloadType(workloadType)
       .withContainer(this.container)
       .withName(this.container.name);
   }
@@ -51,7 +52,7 @@ export class ContainerBuilder {
   }
 }
 
-// ----------------------------------------------------------------------------
+// Workload -------------------------------------------------------------------
 
 export enum WorkloadType {
   Deployment,
@@ -166,12 +167,21 @@ export class Workload extends Chart {
         },
       });
     } else if (workloadType === WorkloadType.StatefulSet) {
-      throw new Error("statefulset not implemented");
+      new k8s.StatefulSet(this, "statefulset", {
+        metadata: { name, namespace },
+        spec: {
+          selector: { matchLabels: selectorLabels },
+          serviceName: name,
+          template: {
+            spec: { containers, volumes },
+          },
+        },
+      });
     } else if (workloadType === WorkloadType.DaemonSet) {
       throw new Error("daemonset not implemented");
     }
 
-    if (expose) {
+    if (expose || workloadType === WorkloadType.StatefulSet) {
       let servicePorts: k8s.ServicePort[] = [];
       containers.forEach((ctr) => {
         ctr.ports?.forEach((port) =>

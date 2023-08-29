@@ -11,6 +11,7 @@ container("ghcr.io/linuxserver/sonarr:latest")
   .asWorkload()
   .withExpose()
   .withVolumeAndMount(hostPath("config", "/data/config/sonarr", "/config"))
+  .withVolumeAndMount(hostPath("downloads", "/data/torrents", "/downloads"))
   .withVolumeAndMount(hostPath("tv", "/data/media/tv", "/tv"))
   .withNamespace("media")
   .build(app, "sonarr");
