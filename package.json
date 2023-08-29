@@ -6,15 +6,15 @@
   "license": "Apache-2.0",
   "private": true,
   "scripts": {
-    "import": "npx cdk8s import",
-    "synth": "npx cdk8s synth",
-    "compile": "npx tsc --build",
-    "watch": "npx tsc --build -w",
-    "test": "jest",
-    "build": "npm run compile && npm run test && npm run synth",
-    "qbuild": "npm run compile && npm run synth",
-    "upgrade": "npm i cdk8s@latest cdk8s-cli@latest",
-    "upgrade:next": "npm i cdk8s@next cdk8s-cli@next"
+    "import": "yarn cdk8s import",
+    "synth": "yarn cdk8s synth",
+    "compile": "yarn tsc --build",
+    "watch": "yarn tsc --build -w",
+    "test": "yarn jest",
+    "build": "yarn run compile && yarn run test && yarn run synth",
+    "qbuild": "yarn run compile && yarn run synth",
+    "upgrade": "yarn install cdk8s@latest cdk8s-cli@latest",
+    "upgrade:next": "yarn install cdk8s@next cdk8s-cli@next"
   },
   "dependencies": {
     "cdk8s": "^2.29.0",
