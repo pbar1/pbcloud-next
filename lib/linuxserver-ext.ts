@@ -7,7 +7,7 @@ declare module "./workload" {
   }
 
   interface WorkloadBuilder {
-    withTorrentMount(): WorkloadBuilder;
+    withDownloadsMount(): WorkloadBuilder;
     withTvMount(): WorkloadBuilder;
     withMoviesMount(): WorkloadBuilder;
     withAudiobooksMount(): WorkloadBuilder;
@@ -27,7 +27,7 @@ ContainerBuilder.prototype.asLinuxServerWorkload =
       );
   };
 
-WorkloadBuilder.prototype.withTorrentMount = function (): WorkloadBuilder {
+WorkloadBuilder.prototype.withDownloadsMount = function (): WorkloadBuilder {
   return this.withVolumeAndMount(
     hostPath("downloads", "/data/torrents", "/downloads")
   );

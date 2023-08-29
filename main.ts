@@ -5,10 +5,16 @@ import "./lib/linuxserver-ext";
 
 const app = new App();
 
+container("ghcr.io/linuxserver/prowlarr:latest")
+  .withPort(port(9696))
+  .asLinuxServerWorkload()
+  .withNamespace("media")
+  .build(app);
+
 container("ghcr.io/linuxserver/sonarr:latest")
   .withPort(port(8989))
   .asLinuxServerWorkload()
-  .withTorrentMount()
+  .withDownloadsMount()
   .withTvMount()
   .withNamespace("media")
   .build(app);
@@ -16,7 +22,7 @@ container("ghcr.io/linuxserver/sonarr:latest")
 container("ghcr.io/linuxserver/radarr:latest")
   .withPort(port(7878))
   .asLinuxServerWorkload()
-  .withTorrentMount()
+  .withDownloadsMount()
   .withMoviesMount()
   .withNamespace("media")
   .build(app);
@@ -24,8 +30,16 @@ container("ghcr.io/linuxserver/radarr:latest")
 container("ghcr.io/linuxserver/readarr:develop")
   .withPort(port(8787))
   .asLinuxServerWorkload()
-  .withTorrentMount()
+  .withDownloadsMount()
   .withAudiobooksMount()
+  .withNamespace("media")
+  .build(app);
+
+container("ghcr.io/linuxserver/bazarr:latest")
+  .withPort(port(6767))
+  .asLinuxServerWorkload()
+  .withTvMount()
+  .withMoviesMount()
   .withNamespace("media")
   .build(app);
 
