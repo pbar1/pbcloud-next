@@ -8,7 +8,7 @@ const app = new App();
 container("ghcr.io/linuxserver/sonarr:latest")
   .withLinuxServerDefaults()
   .withPort(port(8989))
-  .asWorkload(WorkloadType.DaemonSet)
+  .asWorkload(WorkloadType.CronJob)
   .withExpose()
   .withVolumeAndMount(hostPath("config", "/data/config/sonarr", "/config"))
   .withVolumeAndMount(hostPath("downloads", "/data/torrents", "/downloads"))

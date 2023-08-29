@@ -56,9 +56,12 @@ export class ContainerBuilder {
 
 export enum WorkloadType {
   Pod,
+  ReplicaSet,
   Deployment,
   StatefulSet,
   DaemonSet,
+  Job,
+  CronJob,
 }
 
 export interface WorkloadProps {
@@ -68,6 +71,7 @@ export interface WorkloadProps {
   expose?: boolean;
   containers?: WritableDeep<k8s.Container>[];
   volumes?: WritableDeep<k8s.Volume>[];
+  schedule?: string;
 }
 
 export class WorkloadBuilder {
@@ -136,6 +140,11 @@ export class WorkloadBuilder {
     return this;
   }
 
+  withSchedule(schedule: string) {
+    this.props.schedule = schedule;
+    return this;
+  }
+
   build(scope: Construct, id: string): Workload {
     return new Workload(scope, id, this.props);
   }
@@ -155,6 +164,7 @@ export class Workload extends Chart {
     const expose = props.expose ?? false;
     const containers = props.containers;
     const volumes = props.volumes;
+    const schedule = props.schedule;
 
     const metadata: k8s.ObjectMeta = { name, namespace };
     const selectorLabels = { workload: name };
@@ -162,6 +172,14 @@ export class Workload extends Chart {
 
     if (workloadType === WorkloadType.Pod) {
       new k8s.Pod(this, "pod", { metadata, spec: podSpec });
+    } else if (workloadType === WorkloadType.ReplicaSet) {
+      new k8s.ReplicaSet(this, "replicaset", {
+        metadata,
+        spec: {
+          selector: { matchLabels: selectorLabels },
+          template: { spec: podSpec },
+        },
+      });
     } else if (workloadType === WorkloadType.Deployment) {
       new k8s.Deployment(this, "deployment", {
         metadata,
@@ -185,6 +203,22 @@ export class Workload extends Chart {
         spec: {
           selector: { matchLabels: selectorLabels },
           template: { spec: podSpec },
+        },
+      });
+    } else if (workloadType === WorkloadType.Job) {
+      new k8s.Job(this, "job", {
+        metadata,
+        spec: { template: { spec: podSpec } },
+      });
+    } else if (workloadType === WorkloadType.CronJob) {
+      if (!schedule) {
+        throw new Error("must set schedule for for CronJob");
+      }
+      new k8s.CronJob(this, "cronjob", {
+        metadata,
+        spec: {
+          jobTemplate: { spec: { template: { spec: podSpec } } },
+          schedule,
         },
       });
     }
