@@ -55,6 +55,7 @@ export class ContainerBuilder {
 // Workload -------------------------------------------------------------------
 
 export enum WorkloadType {
+  Pod,
   Deployment,
   StatefulSet,
   DaemonSet,
@@ -154,33 +155,41 @@ export class Workload extends Chart {
     const expose = props.expose ?? false;
     const containers = props.containers;
     const volumes = props.volumes;
-    const selectorLabels = { app: name };
 
-    if (workloadType === WorkloadType.Deployment) {
+    const metadata: k8s.ObjectMeta = { name, namespace };
+    const selectorLabels = { workload: name };
+    const podSpec: k8s.PodSpec = { containers, volumes };
+
+    if (workloadType === WorkloadType.Pod) {
+      new k8s.Pod(this, "pod", { metadata, spec: podSpec });
+    } else if (workloadType === WorkloadType.Deployment) {
       new k8s.Deployment(this, "deployment", {
-        metadata: { name, namespace },
+        metadata,
         spec: {
           selector: { matchLabels: selectorLabels },
-          template: {
-            spec: { containers, volumes },
-          },
+          template: { spec: podSpec },
         },
       });
     } else if (workloadType === WorkloadType.StatefulSet) {
       new k8s.StatefulSet(this, "statefulset", {
-        metadata: { name, namespace },
+        metadata,
         spec: {
           selector: { matchLabels: selectorLabels },
+          template: { spec: podSpec },
           serviceName: name,
-          template: {
-            spec: { containers, volumes },
-          },
         },
       });
     } else if (workloadType === WorkloadType.DaemonSet) {
-      throw new Error("daemonset not implemented");
+      new k8s.DaemonSet(this, "daemonset", {
+        metadata,
+        spec: {
+          selector: { matchLabels: selectorLabels },
+          template: { spec: podSpec },
+        },
+      });
     }
 
+    // StatefulSets require an associated Service
     if (expose || workloadType === WorkloadType.StatefulSet) {
       let servicePorts: k8s.ServicePort[] = [];
       containers.forEach((ctr) => {
@@ -194,7 +203,7 @@ export class Workload extends Chart {
       });
 
       new k8s.Service(this, "service", {
-        metadata: { name, namespace },
+        metadata,
         spec: {
           selector: selectorLabels,
           ports: servicePorts,
