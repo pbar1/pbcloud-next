@@ -1,19 +1,32 @@
 import { App } from "cdk8s";
 import { container } from "./lib/workload";
-import { port, hostPath } from "./lib/helpers";
+import { port } from "./lib/helpers";
 import "./lib/linuxserver-ext";
 
 const app = new App();
 
 container("ghcr.io/linuxserver/sonarr:latest")
-  .withLinuxServerDefaults()
   .withPort(port(8989))
-  .asWorkload()
-  .withExpose()
-  .withVolumeAndMount(hostPath("config", "/data/config/sonarr", "/config"))
-  .withVolumeAndMount(hostPath("downloads", "/data/torrents", "/downloads"))
-  .withVolumeAndMount(hostPath("tv", "/data/media/tv", "/tv"))
+  .asLinuxServerWorkload()
+  .withTorrentMount()
+  .withTvMount()
   .withNamespace("media")
-  .build(app, "sonarr");
+  .build(app);
+
+container("ghcr.io/linuxserver/radarr:latest")
+  .withPort(port(7878))
+  .asLinuxServerWorkload()
+  .withTorrentMount()
+  .withMoviesMount()
+  .withNamespace("media")
+  .build(app);
+
+container("ghcr.io/linuxserver/readarr:develop")
+  .withPort(port(8787))
+  .asLinuxServerWorkload()
+  .withTorrentMount()
+  .withAudiobooksMount()
+  .withNamespace("media")
+  .build(app);
 
 app.synth();

@@ -32,6 +32,10 @@ export class ContainerBuilder {
     this.container = { name, image };
   }
 
+  getName(): string {
+    return this.container.name;
+  }
+
   withEnv(env: k8s.EnvVar) {
     if (!this.container.env) {
       this.container.env = [];
@@ -159,7 +163,13 @@ export class WorkloadBuilder {
     return this;
   }
 
-  build(scope: Construct, id: string): Workload {
+  build(scope: Construct, id?: string): Workload {
+    if (id === undefined) {
+      if (this.props.name === undefined) {
+        throw new Error("id must be passed if props.name has not been set");
+      }
+      id = this.props.name;
+    }
     return new Workload(scope, id, this.props);
   }
 }
