@@ -1,3 +1,30 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Workload Basic 1`] = `undefined`;
+exports[`Workload Basic 1`] = `
+Array [
+  Object {
+    "apiVersion": "apps/v1",
+    "kind": "Deployment",
+    "metadata": Object {
+      "name": "image",
+    },
+    "spec": Object {
+      "selector": Object {
+        "matchLabels": Object {
+          "workload": "image",
+        },
+      },
+      "template": Object {
+        "spec": Object {
+          "containers": Array [
+            Object {
+              "image": "example.com/repo/image:tag",
+              "name": "image",
+            },
+          ],
+        },
+      },
+    },
+  },
+]
+`;

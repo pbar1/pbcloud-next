@@ -52,5 +52,16 @@
       "**.js",
       "imports/*"
     ]
+  },
+  "jest": {
+    "roots": [
+      "<rootDir>"
+    ],
+    "testMatch": [
+      "**/*.test.ts"
+    ],
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
+    }
   }
 }

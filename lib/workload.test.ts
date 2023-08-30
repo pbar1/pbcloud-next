@@ -1,16 +1,16 @@
-// import { Testing } from "cdk8s";
-// import { WorkloadBuilder, container } from "./workload";
+import { Testing } from "cdk8s";
+import { container } from "./workload";
 
-// describe("Workload", () => {
-//   test("Basic", () => {
-//     const app = Testing.app();
+describe("Workload", () => {
+  test("Basic", () => {
+    const app = Testing.app();
 
-//     new WorkloadBuilder(app, "testing")
-//       .withContainer(container("example/img:latest"))
-//       .build();
+    const chart = container("example.com/repo/image:tag")
+      .asWorkload()
+      .build(app);
 
-//     const results = app.synth();
+    const results = Testing.synth(chart);
 
-//     expect(results).toMatchSnapshot();
-//   });
-// });
+    expect(results).toMatchSnapshot();
+  });
+});
