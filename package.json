@@ -24,10 +24,28 @@
   "devDependencies": {
     "@types/jest": "^26",
     "@types/node": "^14",
+    "@typescript-eslint/eslint-plugin": "^6.5.0",
+    "@typescript-eslint/parser": "^6.5.0",
     "cdk8s-cli": "^2.15.1",
+    "eslint": "^8.48.0",
     "jest": "^26",
     "ts-jest": "^26",
     "ts-node": "^10",
     "typescript": "^4.9.5"
+  },
+  "eslintConfig": {
+    "extends": [
+      "eslint:recommended",
+      "plugin:@typescript-eslint/recommended"
+    ],
+    "parser": "@typescript-eslint/parser",
+    "plugins": [
+      "@typescript-eslint"
+    ],
+    "root": true,
+    "ignorePatterns": [
+      "**.js",
+      "imports/*"
+    ]
   }
 }

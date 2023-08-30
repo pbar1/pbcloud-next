@@ -136,7 +136,7 @@ export class WorkloadBuilder {
     pair: [k8s.Volume, k8s.VolumeMount],
     containerName?: string
   ) {
-    let [volume, mount] = pair;
+    const [volume, mount] = pair;
 
     if (!this.props.volumes) {
       this.props.volumes = [];
@@ -262,7 +262,7 @@ export class Workload extends Chart {
     // All expose types will at least need a Service
     // StatefulSets require an associated Service
     if (exposeType !== undefined || workloadType === WorkloadType.StatefulSet) {
-      let servicePorts: k8s.ServicePort[] = [];
+      const servicePorts: k8s.ServicePort[] = [];
       containers.forEach((ctr) => {
         ctr.ports?.forEach((port) =>
           servicePorts.push({
