@@ -44,7 +44,7 @@ export function envSec(name: string, secret: string, key: string): k8s.EnvVar {
 export function port(
   port: number,
   protocol?: string,
-  name?: string
+  name?: string,
 ): k8s.ContainerPort {
   return {
     containerPort: port,
@@ -66,7 +66,7 @@ export function hostPath(
   name: string,
   hostPath: string,
   mountPath: string,
-  readOnly?: boolean
+  readOnly?: boolean,
 ): [k8s.Volume, k8s.VolumeMount] {
   return [
     { name, hostPath: { path: hostPath } },

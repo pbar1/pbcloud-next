@@ -23,13 +23,13 @@ ContainerBuilder.prototype.asLinuxServerWorkload =
       .asWorkload()
       .withExpose()
       .withVolumeAndMount(
-        hostPath("config", `/data/config/${name}`, "/config")
+        hostPath("config", `/data/config/${name}`, "/config"),
       );
   };
 
 WorkloadBuilder.prototype.withDownloadsMount = function (): WorkloadBuilder {
   return this.withVolumeAndMount(
-    hostPath("downloads", "/data/torrents", "/downloads")
+    hostPath("downloads", "/data/torrents", "/downloads"),
   );
 };
 
@@ -39,12 +39,12 @@ WorkloadBuilder.prototype.withTvMount = function (): WorkloadBuilder {
 
 WorkloadBuilder.prototype.withMoviesMount = function (): WorkloadBuilder {
   return this.withVolumeAndMount(
-    hostPath("movies", "/data/media/movies", "/movies")
+    hostPath("movies", "/data/media/movies", "/movies"),
   );
 };
 
 WorkloadBuilder.prototype.withAudiobooksMount = function (): WorkloadBuilder {
   return this.withVolumeAndMount(
-    hostPath("audiobooks", "/data/media/audiobooks", "/audiobooks")
+    hostPath("audiobooks", "/data/media/audiobooks", "/audiobooks"),
   );
 };

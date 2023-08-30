@@ -134,7 +134,7 @@ export class WorkloadBuilder {
    */
   withVolumeAndMount(
     pair: [k8s.Volume, k8s.VolumeMount],
-    containerName?: string
+    containerName?: string,
   ) {
     const [volume, mount] = pair;
 
@@ -269,7 +269,7 @@ export class Workload extends Chart {
             name: port.name,
             protocol: port.protocol,
             port: port.containerPort,
-          })
+          }),
         );
       });
 
