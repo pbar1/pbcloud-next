@@ -1,0 +1,4 @@
+.vscode/ linguist-generated=true
+.yarn/ linguist-generated=true
+helm/ linguist-generated=true
+imports/ linguist-generated=true
